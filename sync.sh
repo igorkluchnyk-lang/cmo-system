@@ -25,10 +25,7 @@ for f in "$SRC_SKILL"/references/*.md; do
   cp "$f" skills/cmo/references/
 done
 
-# 3. шаблон контексту повертаємо з git (він не в ~/.claude)
-git checkout -- skills/cmo/references/business-context.template.md 2>/dev/null || true
-
-# 4. деперсоналізація
+# 3. деперсоналізація
 python3 - <<'PY'
 import pathlib, re
 r = pathlib.Path.home()/'cmo-system'
@@ -49,14 +46,14 @@ for f in list((r/'agents').glob('*.md')) + list((r/'skills/cmo').rglob('*.md')):
         f.write_text(t)
 PY
 
-# 5. запобіжник: нічого приватного не просочилось
+# 4. запобіжник: нічого приватного не просочилось
 if grep -rIl "TISTO\|Ігор\|ntn_\|ghp_\|sk-" agents skills 2>/dev/null | grep -q .; then
   echo "🛑 СТОП: знайдено приватні дані. Пуш скасовано."
   grep -rIn "TISTO\|Ігор\|ntn_\|ghp_\|sk-" agents skills | head
   exit 1
 fi
 
-# 6. коміт і пуш
+# 5. коміт і пуш
 if git diff --quiet && git diff --cached --quiet && [ -z "$(git status --porcelain)" ]; then
   echo "✅ змін немає — репозиторій уже актуальний"
   exit 0
